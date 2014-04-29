@@ -1,0 +1,24 @@
+{
+    "name": "byscripts/object-manager-bundle",
+    "type": "symfony-bundle",
+    "description": "An object manager to handle your Doctrine entities and documents",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Thierry Goettelmann",
+            "email": "thierry@byscripts.info"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "symfony/dependency-injection": "2.3.*",
+        "symfony/config": "2.3.*",
+        "symfony/http-kernel": "2.3.*",
+        "doctrine/orm": "~2.3"
+    },
+    "autoload": {
+        "psr-4": {
+           "Byscripts\\Bundle\\ObjectManagerBundle\\": "src/"
+        }
+    }
+}
