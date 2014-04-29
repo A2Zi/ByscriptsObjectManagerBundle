@@ -136,25 +136,26 @@ abstract class AbstractObjectManager
      * Save the object to the database
      *
      * @param object $object
+     * @param array  $options
      *
      * @return bool
      */
-    public function save($object)
+    public function save($object, array $options = array())
     {
         $isNew = !(bool)$object->getId();
 
         try {
-            $this->processSave($object);
+            $this->processSave($object, $options);
 
             $isNew
-                ? $this->onCreateSuccess($object)
-                : $this->onUpdateSuccess($object);
+                ? $this->onCreateSuccess($object, $options)
+                : $this->onUpdateSuccess($object, $options);
 
             return true;
         } catch (ObjectManagerException $exception) {
             $isNew
-                ? $this->onCreateError($object, $exception->getMessage())
-                : $this->onUpdateError($object, $exception->getMessage());
+                ? $this->onCreateError($object, $exception->getMessage(), $options)
+                : $this->onUpdateError($object, $exception->getMessage(), $options);
 
             return false;
         }
@@ -164,18 +165,19 @@ abstract class AbstractObjectManager
      * Delete the object from the database
      *
      * @param object $object
+     * @param array  $options
      *
      * @return bool
      */
-    public function delete($object)
+    public function delete($object, array $options = array())
     {
         try {
-            $this->processDelete($object);
-            $this->onDeleteSuccess($object);
+            $this->processDelete($object, $options);
+            $this->onDeleteSuccess($object, $options);
 
             return true;
         } catch (ObjectManagerException $exception) {
-            $this->onDeleteError($object, $exception->getMessage());
+            $this->onDeleteError($object, $exception->getMessage(), $options);
 
             return false;
         }
@@ -185,18 +187,19 @@ abstract class AbstractObjectManager
      * Duplicate the object
      *
      * @param object $object The object to duplicate
+     * @param array  $options
      *
      * @return object|false The new object
      */
-    public function duplicate($object)
+    public function duplicate($object, array $options = array())
     {
         try {
-            $clone = $this->processDuplicate($object);
-            $this->onDuplicateSuccess($object, $clone);
+            $clone = $this->processDuplicate($object, $options);
+            $this->onDuplicateSuccess($object, $clone, $options);
 
             return $clone;
         } catch (ObjectManagerException $exception) {
-            $this->onDuplicateError($object, $exception->getMessage());
+            $this->onDuplicateError($object, $exception->getMessage(), $options);
 
             return false;
         }
@@ -206,18 +209,19 @@ abstract class AbstractObjectManager
      * Activate the object
      *
      * @param object $object The object to activate
+     * @param array  $options
      *
      * @return bool
      */
-    public function activate($object)
+    public function activate($object, array $options = array())
     {
         try {
-            $this->processActivate($object);
-            $this->onActivateSuccess($object);
+            $this->processActivate($object, $options);
+            $this->onActivateSuccess($object, $options);
 
             return true;
         } catch (ObjectManagerException $exception) {
-            $this->onActivateError($object, $exception->getMessage());
+            $this->onActivateError($object, $exception->getMessage(), $options);
 
             return false;
         }
@@ -227,18 +231,19 @@ abstract class AbstractObjectManager
      * Deactivate the object
      *
      * @param object $object The object to deactivate
+     * @param array  $options
      *
      * @return bool
      */
-    public function deactivate($object)
+    public function deactivate($object, array $options = array())
     {
         try {
-            $this->processDeactivate($object);
-            $this->onDeactivateSuccess($object);
+            $this->processDeactivate($object, $options);
+            $this->onDeactivateSuccess($object, $options);
 
             return true;
         } catch (ObjectManagerException $exception) {
-            $this->onDeactivateError($object, $exception->getMessage());
+            $this->onDeactivateError($object, $exception->getMessage(), $options);
 
             return false;
         }
@@ -246,26 +251,29 @@ abstract class AbstractObjectManager
 
     /**
      * @param object $object
+     * @param array  $options
      */
-    protected function processSave($object)
+    protected function processSave($object, array $options)
     {
         $this->persist($object)->flush();
     }
 
     /**
-     * @param $object
+     * @param       $object
+     * @param array $options
      */
-    protected function processDelete($object)
+    protected function processDelete($object, array $options)
     {
         $this->remove($object)->flush();
     }
 
     /**
-     * @param $object
+     * @param       $object
+     * @param array $options
      *
      * @return mixed
      */
-    protected function processDuplicate($object)
+    protected function processDuplicate($object, array $options)
     {
         $clone = clone $object;
         $this->persist($clone)->flush();
@@ -275,8 +283,9 @@ abstract class AbstractObjectManager
 
     /**
      * @param object $object
+     * @param array  $options
      */
-    protected function processActivate($object)
+    protected function processActivate($object, array $options)
     {
         $object->setActive(true);
         $this->persist($object)->flush();
@@ -284,8 +293,9 @@ abstract class AbstractObjectManager
 
     /**
      * @param object $object
+     * @param array  $options
      */
-    protected function processDeactivate($object)
+    protected function processDeactivate($object, array $options)
     {
         $object->setActivate(false);
         $this->persist($object)->flush();
@@ -295,8 +305,9 @@ abstract class AbstractObjectManager
      * Triggered after the object is created
      *
      * @param object $object
+     * @param array  $options
      */
-    protected function onCreateSuccess($object)
+    protected function onCreateSuccess($object, array $options)
     {
     }
 
@@ -305,8 +316,9 @@ abstract class AbstractObjectManager
      *
      * @param object $object
      * @param string $errorMessage
+     * @param array  $options
      */
-    protected function onCreateError($object, $errorMessage)
+    protected function onCreateError($object, $errorMessage, array $options)
     {
     }
 
@@ -314,8 +326,9 @@ abstract class AbstractObjectManager
      * Triggered after the object is updated
      *
      * @param object $object
+     * @param array  $options
      */
-    protected function onUpdateSuccess($object)
+    protected function onUpdateSuccess($object, array $options)
     {
     }
 
@@ -324,8 +337,9 @@ abstract class AbstractObjectManager
      *
      * @param object $object
      * @param string $errorMessage
+     * @param array  $options
      */
-    protected function onUpdateError($object, $errorMessage)
+    protected function onUpdateError($object, $errorMessage, array $options)
     {
     }
 
@@ -333,8 +347,9 @@ abstract class AbstractObjectManager
      * Triggered after the object is deleted
      *
      * @param object $object
+     * @param array  $options
      */
-    protected function onDeleteSuccess($object)
+    protected function onDeleteSuccess($object, array $options)
     {
     }
 
@@ -343,8 +358,9 @@ abstract class AbstractObjectManager
      *
      * @param object $object
      * @param string $errorMessage
+     * @param array  $options
      */
-    protected function onDeleteError($object, $errorMessage)
+    protected function onDeleteError($object, $errorMessage, array $options)
     {
     }
 
@@ -352,8 +368,9 @@ abstract class AbstractObjectManager
      * Triggered after the object is activated
      *
      * @param object $object
+     * @param array  $options
      */
-    protected function onActivateSuccess($object)
+    protected function onActivateSuccess($object, array $options)
     {
     }
 
@@ -362,8 +379,9 @@ abstract class AbstractObjectManager
      *
      * @param object $object
      * @param string $errorMessage
+     * @param array  $options
      */
-    protected function onActivateError($object, $errorMessage)
+    protected function onActivateError($object, $errorMessage, array $options)
     {
     }
 
@@ -371,8 +389,9 @@ abstract class AbstractObjectManager
      * Triggered after the object is deactivated
      *
      * @param object $object
+     * @param array  $options
      */
-    protected function onDeactivateSuccess($object)
+    protected function onDeactivateSuccess($object, array $options)
     {
     }
 
@@ -381,8 +400,9 @@ abstract class AbstractObjectManager
      *
      * @param object $object
      * @param string $errorMessage
+     * @param array  $options
      */
-    protected function onDeactivateError($object, $errorMessage)
+    protected function onDeactivateError($object, $errorMessage, array $options)
     {
     }
 
@@ -391,8 +411,9 @@ abstract class AbstractObjectManager
      *
      * @param object $object The duplicated object
      * @param object $clone  The duplicate of the object
+     * @param array  $options
      */
-    protected function onDuplicateSuccess($object, $clone)
+    protected function onDuplicateSuccess($object, $clone, array $options)
     {
     }
 
@@ -401,8 +422,9 @@ abstract class AbstractObjectManager
      *
      * @param object $object
      * @param string $errorMessage
+     * @param array  $options
      */
-    protected function onDuplicateError($object, $errorMessage)
+    protected function onDuplicateError($object, $errorMessage, array $options)
     {
     }
 }
